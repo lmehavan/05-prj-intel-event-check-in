@@ -60,8 +60,30 @@ function loadAttendance() {
     try {
       const parsedData = JSON.parse(savedData);
 
-      if (Array.isArray(parsedData.attendees) && parsedData.counts) {
-        attendanceData = parsedData;
+      if (Array.isArray(parsedData.attendees)) {
+        const validAttendees = parsedData.attendees.filter(function (attendee) {
+          return (
+            attendee &&
+            typeof attendee.name === "string" &&
+            attendee.name.trim() &&
+            teamLabels[attendee.team]
+          );
+        });
+
+        const restoredCounts = {
+          water: 0,
+          zero: 0,
+          power: 0,
+        };
+
+        validAttendees.forEach(function (attendee) {
+          restoredCounts[attendee.team] += 1;
+        });
+
+        attendanceData = {
+          attendees: validAttendees,
+          counts: restoredCounts,
+        };
       }
     } catch (error) {
       localStorage.removeItem(savedDataKey);
